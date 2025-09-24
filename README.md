@@ -7,3 +7,6 @@ HEAD: A file in git
 index: A file in git
 
 No difficulties with this part
+
+SHA-1:
+I utilized the format for initializing a SHA-1 from the GeeksforGeeks website. It helped me create a SHA-1 in my code. Now, this hash will serve as the unique identifier for a String file input.
