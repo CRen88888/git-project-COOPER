@@ -5,7 +5,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class Git {
     public static void main(String[] args) {
-        System.out.println(encryptThisString("Cooper"));
+        System.out.println(hashFunction("Cooper"));
 
     }
 
@@ -40,7 +40,7 @@ public class Git {
         }
     }
 
-    public static String encryptThisString(String input) {
+    public static String hashFunction(String input) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
 
