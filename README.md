@@ -24,3 +24,6 @@ void repositoryCycles():
 This method runs 10 initialization/cleanup cycles to ensure both methods function correctly.
 
 I tested these methods in the main of Git to ensure that all three functions work. My code works on edge cases.
+
+void createBlob():
+This method takes in the String filePath and then generates a new BLOB where the contents of the file is the name and the contents of it are identical to the original file. If the filepath is null, this method does nothing.
