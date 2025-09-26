@@ -5,7 +5,7 @@ import java.security.NoSuchAlgorithmException;
 
 public class Git {
     public static void main(String[] args) {
-        System.out.println(hashFunction("Cooper"));
+        GitTester.repositoryCycles();
 
     }
 
@@ -39,6 +39,8 @@ public class Git {
             System.out.println("Git Repository Created");
         }
     }
+
+
 
     public static String hashFunction(String input) {
         try {
