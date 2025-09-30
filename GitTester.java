@@ -7,10 +7,7 @@ import java.nio.file.Paths;
 
 public class GitTester {
     public static void main(String[] args) throws FileNotFoundException {
-        Git.createBlob("Tester.txt");
-
-        Git.createRepository();
-        reset();
+        indexTest();
 
     }
 

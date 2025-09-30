@@ -104,4 +104,25 @@ public class Git {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public static void updateIndex(String filePath) throws IOException {
+        byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+        String data = new String(bytes, StandardCharsets.UTF_8);
+        String name = hashFunction(data);
+        File index = new File("git/index");
+        boolean check = index.exists() && index.length() > 0;
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
+            if (check == true) {
+                bw.newLine();
+            }
+            bw.write(name + " " + filePath);
+            bw.close();
+
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+
 }
