@@ -44,3 +44,11 @@ Each line contains the SHA1 hash followed by a single-space and then the origina
 
 void indexTest():
 This method creates a sample of text files with different contents, adds entries to the index file for each file, generates the corresponding BLOBs in the objects directory, and verifies that the index entries match the actual files.
+
+void robustReset():
+This method deletes all generated files from previous tests, including all objects in the objects directory. It calls on the helper method resetAllFiles(File directory). It deletes the index file and then creates a new one to reset it.
+
+void resetAllFiles(File directory):
+This is the helper method for robustReset(). It recursively deletes all generated files from previous tests including all objects in the objects directory.
+
+

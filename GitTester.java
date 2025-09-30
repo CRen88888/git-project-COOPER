@@ -6,8 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class GitTester {
-    public static void main(String[] args) throws FileNotFoundException {
-        indexTest();
+
+    public static void main(String[] args) throws IOException {
+        robustReset();
+
 
     }
 
@@ -132,4 +134,32 @@ public class GitTester {
             e.printStackTrace();
         }
     }
+
+    public static void robustReset() throws IOException {
+        File directory = new File(".");
+        resetAllFiles(directory);
+        File index = new File("git/index");
+        index.delete();
+        index.createNewFile();
+
+    }
+
+    public static void resetAllFiles(File directory) {
+        File[] list = directory.listFiles();
+        for (File f : list) {
+            if (!f.getName().equals("README.md") && f.getName().charAt(0) != '.'
+                    && !f.getName().contains(".java") && list != null && !f.getName().equals("HEAD")
+                    && !f.getName().equals("index")) {
+                if (f.isDirectory()) {
+                    resetAllFiles(f);
+
+                } else {
+                    f.delete();
+                }
+
+
+            }
+        }
+    }
+
 }
