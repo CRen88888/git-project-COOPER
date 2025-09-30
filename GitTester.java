@@ -4,12 +4,13 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.IOException;
 
 public class GitTester {
     public static void main(String[] args) throws FileNotFoundException {
         indexTest();
-
     }
+
 
     public static boolean repositoryCheck() {
         File git = new File("git");
