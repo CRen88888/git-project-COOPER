@@ -1,8 +1,9 @@
 import java.io.File;
+import java.io.FileNotFoundException;
 
 public class GitTester {
-    public static void main(String[] args) {
-        System.out.println(repositoryCheck());
+    public static void main(String[] args) throws FileNotFoundException {
+        Git.createBlob("Tester.txt");
     }
 
     public static boolean repositoryCheck() {
