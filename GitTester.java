@@ -1,12 +1,11 @@
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class GitTester {
-    public static void main(String[] args) throws FileNotFoundException {
-        Git.createBlob("Tester.txt");
-
+    public static void main(String[] args) throws IOException {
         Git.createRepository();
-        reset();
+        Git.updateIndex("file.txt");
+        Git.updateIndex("Tester.txt");
 
     }
 
