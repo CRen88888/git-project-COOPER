@@ -98,10 +98,11 @@ public class Git {
             }
             bw.write(name + " " + filePath);
             bw.close();
-            System.out.println("Index updated: " + name + " " + filePath);
 
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+
 }
