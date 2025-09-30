@@ -27,3 +27,20 @@ I tested these methods in the main of Git to ensure that all three functions wor
 
 void createBlob():
 This method takes in the String filePath and then generates a new BLOB where the contents of the file is the name and the contents of it are identical to the original file. If the filepath is null, this method does nothing.
+
+boolean blobTest():
+This method checks whether there are blobs present in the objects directory. If there aren't any, it returns false. However, if there are more than 0 files in the directory, it lists them out and returns true.
+
+void reset():
+This method resets all the files used, so that methods can be repeatedly tested again. It uses the helper method of deleteGit(File file). It creates a new repository after.
+
+void deleteGit(File file):
+This method deletes everything in the repository to help reset the files. It recursively removes the children of each directory, eventually removing the root directory as well.
+
+void updateIndex(String filePath):
+This method adds BLOB and file entries to the index with this format: 553ae7da92f5505a92bbb8c9d47be76ab9f65bc2 filename.txt
+077bd0b932707f2e7c00ee0147535b386ea6751b anotherFile.txt
+Each line contains the SHA1 hash followed by a single-space and then the original filename. It uses a bufferedwriter to write to the index file.
+
+void indexTest():
+This method creates a sample of text files with different contents, adds entries to the index file for each file, generates the corresponding BLOBs in the objects directory, and verifies that the index entries match the actual files.
