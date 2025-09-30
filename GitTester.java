@@ -1,12 +1,13 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class GitTester {
     public static void main(String[] args) throws FileNotFoundException {
-        Git.createBlob("Tester.txt");
-
-        Git.createRepository();
-        reset();
+        indexTest();
 
     }
 
@@ -85,5 +86,51 @@ public class GitTester {
             }
         }
         file.delete();
+    }
+
+    public static void indexTest() {
+        try {
+            Git.createRepository();
+            String[] files = {"test1.txt", "test2.txt", "test3.txt"};
+            Files.writeString(Paths.get("test1.txt"), "I love Joseph Baca");
+            Files.writeString(Paths.get("test2.txt"), "I love Darren Yilmaz");
+            Files.writeString(Paths.get("test3.txt"), "I love Angus Norden");
+            String[] content =
+                    {"I love Joseph Baca", "I love Darren Yilmaz", "I love Angus Norden"};
+            for (int i = 0; i < files.length; i++) {
+                String data = content[i];
+                String name = Git.hashFunction(data);
+                File blob = new File("git/objects/" + name);
+                if (!blob.exists()) {
+                    Files.writeString(blob.toPath(), data);
+
+                }
+                Git.updateIndex(files[i]);
+                System.out.println("New BLOB: " + blob.getPath());
+
+            }
+
+            System.out.println("Verification:\n");
+
+            String[] indexLines =
+                    Files.readAllLines(Paths.get("git/index"), StandardCharsets.UTF_8)
+                            .toArray(new String[0]);
+
+            for (String line : indexLines) {
+                String[] section = line.split(" ");
+                String hash = section[0];
+                String name = section[1];
+                byte[] bytes = Files.readAllBytes(Paths.get(name));
+                String data = new String(bytes, StandardCharsets.UTF_8);
+                String newhash = Git.hashFunction(data);
+                if (hash.equals(newhash)) {
+                    System.out.println(name + " verified");
+                } else {
+                    System.out.println(name + " is not the same");
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
