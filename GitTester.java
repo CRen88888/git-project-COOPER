@@ -4,6 +4,10 @@ import java.io.FileNotFoundException;
 public class GitTester {
     public static void main(String[] args) throws FileNotFoundException {
         Git.createBlob("Tester.txt");
+
+        Git.createRepository();
+        reset();
+
     }
 
     public static boolean repositoryCheck() {
@@ -45,5 +49,41 @@ public class GitTester {
         }
         System.out.println("You're awesome. This code works, you genius.");
 
+    }
+
+    public static boolean blobTest() {
+        File objects = new File("git/objects/");
+        if (!objects.exists() || objects.listFiles().length == 0 || objects.listFiles() == null) {
+            return false;
+        } else {
+            File[] files = objects.listFiles();
+            System.out.println("Objects contains: ");
+            for (File file : files)
+                System.out.println(file.getName() + " ");
+
+            return true;
+        }
+
+    }
+
+    public static void reset() {
+        File git = new File("git");
+        deleteGit(git);
+        Git.createRepository();
+        System.out.println("Reset successful");
+
+
+    }
+
+    public static void deleteGit(File file) {
+        if (file.isDirectory()) {
+            File[] children = file.listFiles();
+            if (children.length > 0 && children != null) {
+                for (File child : children) {
+                    deleteGit(child);
+                }
+            }
+        }
+        file.delete();
     }
 }
