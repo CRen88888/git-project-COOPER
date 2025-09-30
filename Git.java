@@ -1,5 +1,14 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -65,6 +74,31 @@ public class Git {
 
         catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void createBlob(String filePath) throws FileNotFoundException {
+        if (filePath == null) {
+            ;
+        }
+        try {
+            byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+            String data = new String(bytes, StandardCharsets.UTF_8);
+            String name = hashFunction(data);
+            File file = new File("git/objects/" + name);
+            String s = new String();
+            file.createNewFile();
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            while (br.ready()) {
+                s = s + (br.readLine());
+            }
+            br.close();
+            BufferedWriter wr = new BufferedWriter(new FileWriter("git/objects/" + name));
+            wr.write(s);
+            wr.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
