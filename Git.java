@@ -8,14 +8,19 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Git {
     public static void main(String[] args) throws FileNotFoundException {
 
     }
+
+    public static HashMap<String, String> hash = new HashMap<>();
 
     public static void createRepository() {
         File git = new File("git");
@@ -62,7 +67,7 @@ public class Git {
 
     public static void createBlob(String filePath) throws FileNotFoundException {
         if (filePath == null) {
-            ;
+            return;
         }
         try {
             byte[] bytes = Files.readAllBytes(Paths.get(filePath));
@@ -71,6 +76,8 @@ public class Git {
             File file = new File("git/objects/" + name);
             String s = new String();
             file.createNewFile();
+            String path = getFilePath(filePath);
+            hash.put(path, name);
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             while (br.ready()) {
                 s = s + (br.readLine());
@@ -79,6 +86,7 @@ public class Git {
             BufferedWriter wr = new BufferedWriter(new FileWriter("git/objects/" + name));
             wr.write(s);
             wr.close();
+            updateIndex(filePath);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -91,18 +99,36 @@ public class Git {
         String data = new String(bytes, StandardCharsets.UTF_8);
         String name = hashFunction(data);
         File index = new File("git/index");
+        index.delete();
+        index.createNewFile();
         boolean check = index.exists() && index.length() > 0;
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
             if (check == true) {
-                bw.newLine();
+                bw.write("\n");
             }
-            bw.write(name + " " + filePath);
+            for (Map.Entry<String, String> entry : hash.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                bw.write("blob " + value + " " + key);
+
+            }
+            String path = getFilePath(filePath);
             bw.close();
 
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
+
+
+    }
+
+    public static String getFilePath(String filePath) {
+        File file = new File(filePath);
+        Path base = Paths.get(new File("..").getAbsolutePath());
+        Path relative = Paths.get(file.getAbsolutePath());
+        Path path = base.relativize(relative);
+        return path + "";
     }
 
 

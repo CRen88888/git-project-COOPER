@@ -1,13 +1,13 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class GitTester {
-    public static void main(String[] args) throws FileNotFoundException {
-        indexTest();
+    public static void main(String[] args) throws IOException {
+        Git.createBlob("test1.txt");
+        Git.createBlob("test1.txt");
 
     }
 
@@ -91,19 +91,20 @@ public class GitTester {
     public static void indexTest() {
         try {
             Git.createRepository();
-            String[] files = {"test1.txt", "test2.txt", "test3.txt"};
+            String[] files = {"test1.txt", "test2.txt", "test3.txt", "Hello.txt", "Hello.txt"};
             Files.writeString(Paths.get("test1.txt"), "I love Joseph Baca");
             Files.writeString(Paths.get("test2.txt"), "I love Darren Yilmaz");
             Files.writeString(Paths.get("test3.txt"), "I love Angus Norden");
-            String[] content =
-                    {"I love Joseph Baca", "I love Darren Yilmaz", "I love Angus Norden"};
+            Files.writeString(Paths.get(files[3]), "I am Cooper");
+            Files.writeString(Paths.get(files[4]), "I am Joseph");
+            String[] content = {"I love Joseph Baca", "I love Darren Yilmaz", "I love Angus Norden",
+                    "I am Cooper", "I am Joseph"};
             for (int i = 0; i < files.length; i++) {
                 String data = content[i];
                 String name = Git.hashFunction(data);
                 File blob = new File("git/objects/" + name);
                 if (!blob.exists()) {
                     Files.writeString(blob.toPath(), data);
-
                 }
                 Git.updateIndex(files[i]);
                 System.out.println("New BLOB: " + blob.getPath());
@@ -132,4 +133,5 @@ public class GitTester {
             e.printStackTrace();
         }
     }
+
 }
