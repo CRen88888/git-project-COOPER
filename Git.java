@@ -20,7 +20,8 @@ public class Git {
 
     }
 
-    static HashMap<String, String> hash = new HashMap<>();
+    public static HashMap<String, String> hash = new HashMap<>();
+
 
     public static void createRepository() {
         File git = new File("git");
@@ -134,3 +135,7 @@ public class Git {
 
 
 }
+
+
+
+

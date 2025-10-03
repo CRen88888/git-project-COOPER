@@ -38,9 +38,18 @@ void deleteGit(File file):
 This method deletes everything in the repository to help reset the files. It recursively removes the children of each directory, eventually removing the root directory as well.
 
 void updateIndex(String filePath):
-This method adds BLOB and file entries to the index with this format: 553ae7da92f5505a92bbb8c9d47be76ab9f65bc2 filename.txt
-077bd0b932707f2e7c00ee0147535b386ea6751b anotherFile.txt
-Each line contains the SHA1 hash followed by a single-space and then the original filename. It uses a bufferedwriter to write to the index file.
+This method adds BLOB and file entries to the index with this format: blob 4377a91cdfd44db9a9bbf056849c7da0fc6cc7be myProgram/README.md
+blob 0a4d55a8d778e5022fab701977c5d840bbc486d0 myProgram/Hello.txt
+blob 0acc46ad73849ea9832f600de83a014c9db9cdf0 myProgram/scripts/Cat.java
+Each line contains the SHA1 hash followed by a single-space and then the original filename. It uses a bufferedwriter to write to the index file. It handles duplicate file names, files with the same contents, and updates files as they change. 
 
 void indexTest():
 This method creates a sample of text files with different contents, adds entries to the index file for each file, generates the corresponding BLOBs in the objects directory, and verifies that the index entries match the actual files.
+
+void robustReset():
+This method deletes all generated files from previous tests, including all objects in the objects directory. It calls on the helper method resetAllFiles(File directory). It deletes the index file and then creates a new one to reset it.
+
+void resetAllFiles(File directory):
+This is the helper method for robustReset(). It recursively deletes all generated files from previous tests including all objects in the objects directory.
+
+
