@@ -111,7 +111,7 @@ public class Git {
             for (Map.Entry<String, String> entry : hash.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                bw.write("blob " + value + " " + key);
+                bw.write(value + " " + key);
 
             }
             String path = getFilePath(filePath);
@@ -132,10 +132,52 @@ public class Git {
         return path + "";
     }
 
+    public static String createTree(String directoryPath) throws IOException {
+        File directory = new File(directoryPath);
+        if (!directory.isDirectory()) {
+            throw new IOException("directory path does not lead to a directory");
+        }
+        StringBuilder data = new StringBuilder();
+        File[] children = directory.listFiles();
+        if (children.length > 0 && children != null) {
+            for (File child : children) {
+                if (child.isFile()) {
+                    createBlob(child.getPath());
+                    String sha = hash.get(getFilePath(child.getPath()));
+                    if (sha != null) {
+                        data.append("blob " + sha + " " + child.getName() + "\n");
+                    }
+                    // createBlob(Git.getFilePath(directoryPath + "/" + child));
+                    // byte[] bytes = Files.readAllBytes(Paths.get(directoryPath + "/" + child));
+                    // String data = new String(bytes, StandardCharsets.UTF_8);
+                    // String name = hashFunction(data);
+                    // BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+                    // bw.write("blob " + name + " " + getFilePath(directoryPath + "/" + child));
+                } else {
+                    String sha = createTree(child.getPath());
+                    data.append("tree " + sha + " " + child.getName() + "\n");
+
+                }
+
+            }
+
+        }
+        String treeInfo = data.toString();
+        String treeHash = hashFunction(treeInfo);
+        File tree = new File("git/objects/" + treeHash);
+        if (!tree.exists()) {
+            tree.createNewFile();
+
+        }
+        BufferedWriter bw = new BufferedWriter(new FileWriter(tree));
+        bw.write(treeInfo);
+        bw.close();
+
+        return treeHash;
+    }
+
 
 
 }
-
-
 
 
