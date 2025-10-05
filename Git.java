@@ -143,7 +143,9 @@ public class Git {
             for (File child : children) {
                 if (child.isFile()) {
                     createBlob(child.getPath());
-                    String sha = hash.get(getFilePath(child.getPath()));
+                    byte[] bytes = Files.readAllBytes(Paths.get(child.getPath()));
+                    String name = new String(bytes, StandardCharsets.UTF_8);
+                    String sha = hashFunction(name);
                     if (sha != null) {
                         data.append("blob " + sha + " " + child.getName() + "\n");
                     }
@@ -154,13 +156,16 @@ public class Git {
                     // BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
                     // bw.write("blob " + name + " " + getFilePath(directoryPath + "/" + child));
                 } else {
-                    String sha = createTree(child.getPath());
+                    String sha = createTree(child.getPath()); // directoryPath + "/" + child
                     data.append("tree " + sha + " " + child.getName() + "\n");
 
                 }
 
             }
 
+        }
+        if (data.length() > 0 && data.charAt(data.length() - 1) == '\n') {
+            data.deleteCharAt(data.length() - 1);
         }
         String treeInfo = data.toString();
         String treeHash = hashFunction(treeInfo);
@@ -172,9 +177,10 @@ public class Git {
         BufferedWriter bw = new BufferedWriter(new FileWriter(tree));
         bw.write(treeInfo);
         bw.close();
-
         return treeHash;
     }
+
+    
 
 
 
