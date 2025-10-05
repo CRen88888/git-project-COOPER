@@ -8,20 +8,17 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Git {
     public static void main(String[] args) throws FileNotFoundException {
 
     }
-
-    public static HashMap<String, String> hash = new HashMap<>();
-
 
     public static void createRepository() {
         File git = new File("git");
@@ -68,7 +65,7 @@ public class Git {
 
     public static void createBlob(String filePath) throws FileNotFoundException {
         if (filePath == null) {
-            return;
+            ;
         }
         try {
             byte[] bytes = Files.readAllBytes(Paths.get(filePath));
@@ -77,8 +74,6 @@ public class Git {
             File file = new File("git/objects/" + name);
             String s = new String();
             file.createNewFile();
-            String path = getFilePath(filePath);
-            hash.put(path, name);
             BufferedReader br = new BufferedReader(new FileReader(filePath));
             while (br.ready()) {
                 s = s + (br.readLine());
@@ -87,7 +82,6 @@ public class Git {
             BufferedWriter wr = new BufferedWriter(new FileWriter("git/objects/" + name));
             wr.write(s);
             wr.close();
-            updateIndex(filePath);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -100,36 +94,18 @@ public class Git {
         String data = new String(bytes, StandardCharsets.UTF_8);
         String name = hashFunction(data);
         File index = new File("git/index");
-        index.delete();
-        index.createNewFile();
         boolean check = index.exists() && index.length() > 0;
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
             if (check == true) {
-                bw.write("\n");
+                bw.newLine();
             }
-            for (Map.Entry<String, String> entry : hash.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-                bw.write(value + " " + key);
-
-            }
-            String path = getFilePath(filePath);
+            bw.write(name + " " + filePath);
             bw.close();
 
         } catch (IOException e) {
             System.out.println("Error: " + e.getMessage());
         }
-
-
-    }
-
-    public static String getFilePath(String filePath) {
-        File file = new File(filePath);
-        Path base = Paths.get(new File("..").getAbsolutePath());
-        Path relative = Paths.get(file.getAbsolutePath());
-        Path path = base.relativize(relative);
-        return path + "";
     }
 
     public static String createTree(String directoryPath) throws IOException {
@@ -143,9 +119,7 @@ public class Git {
             for (File child : children) {
                 if (child.isFile()) {
                     createBlob(child.getPath());
-                    byte[] bytes = Files.readAllBytes(Paths.get(child.getPath()));
-                    String name = new String(bytes, StandardCharsets.UTF_8);
-                    String sha = hashFunction(name);
+                    String sha = hash.get(getFilePath(child.getPath()));
                     if (sha != null) {
                         data.append("blob " + sha + " " + child.getName() + "\n");
                     }
@@ -156,16 +130,13 @@ public class Git {
                     // BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
                     // bw.write("blob " + name + " " + getFilePath(directoryPath + "/" + child));
                 } else {
-                    String sha = createTree(child.getPath()); // directoryPath + "/" + child
+                    String sha = createTree(child.getPath());
                     data.append("tree " + sha + " " + child.getName() + "\n");
 
                 }
 
             }
 
-        }
-        if (data.length() > 0 && data.charAt(data.length() - 1) == '\n') {
-            data.deleteCharAt(data.length() - 1);
         }
         String treeInfo = data.toString();
         String treeHash = hashFunction(treeInfo);
@@ -177,13 +148,30 @@ public class Git {
         BufferedWriter bw = new BufferedWriter(new FileWriter(tree));
         bw.write(treeInfo);
         bw.close();
+
         return treeHash;
     }
 
-    
+
+    public static String createIndexTree() throws IOException {
+        File index = new File("git/index");
+        File workingList = new File("git/workingList");
+        ArrayList<String> newLines = new ArrayList<>();
+        for (String line : Files.readAllLines(Paths.get("git/index"))) {
+            String[] parts = line.split(" ");
+            String hash = parts[0];
+            String filePath = parts[1];
+            newLines.add("blob " + hash + " " + filePath);
+        }
+        Collections.sort(newLines);
+        Files.write(Paths.get("git/workingList"), newLines);
+
+        if (!index.exists()) {
+            throw new IOException("index file not found");
+        }
+
+    }
 
 
 
 }
-
-

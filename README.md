@@ -28,6 +28,7 @@ This method returns the path to a file relative to your project’s parent direc
 public static String createTree(String directoryPath):
 This method creates a tree file containing references to all files and subdirectories. It generates blob objects for files and recursively creates tree files for subdirectories. Everything is stored in the objects directory with unique SHA-1 hashes. It returns the SHA-1 hash of the generated tree based on its contents.
 
+
 GITTESTER CONTENT:
 This class is used to check the functionality of the Git class. It checks to verify if all the files are present, it deletes all the files and directories present, and it runs multiple initialization/cleanup cycles to confirm functionality.
 
