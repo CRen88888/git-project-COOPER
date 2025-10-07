@@ -165,38 +165,20 @@ public class Git {
                     }
                 } else {
                     String sha = createTree(child.getPath()); // directoryPath + "/" + child
-<<<<<<< HEAD
-                    data.append("tree " + sha + " " + child.getName() + "\n");
-=======
                     entries.add("tree " + sha + " " + child.getName());
->>>>>>> origin/main
 
                 }
 
             }
 
         }
-<<<<<<< HEAD
-        if (data.length() > 0 && data.charAt(data.length() - 1) == '\n') {
-            data.deleteCharAt(data.length() - 1);
-        }
-        String treeInfo = data.toString();
-=======
         String treeInfo = String.join("\n", entries);
->>>>>>> origin/main
         String treeHash = hashFunction(treeInfo);
         Path tree = Paths.get("git", "objects", treeHash);
         if (!Files.exists(tree)) {
             Files.write(tree, treeInfo.getBytes(StandardCharsets.UTF_8));
 
         }
-<<<<<<< HEAD
-        BufferedWriter bw = new BufferedWriter(new FileWriter(tree));
-        bw.write(treeInfo);
-        bw.close();
-=======
-
->>>>>>> origin/main
         return treeHash;
     }
 
@@ -291,7 +273,6 @@ public class Git {
         }
         String deepestLine = entries.get(0);
         String[] parts = deepestLine.split(" ", 3);
-        String type = parts[0];
         File deepestFile = new File(parts[2]);
         File targetDirectory = deepestFile.getParentFile();
         targetDirectory = new File(
