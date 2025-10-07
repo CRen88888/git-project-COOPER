@@ -115,9 +115,6 @@ public class Git {
     }
 
     public static void updateIndex(String filePath) throws IOException {
-        // byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-        // String data = new String(bytes, StandardCharsets.UTF_8);
-        // String name = hashFunction(data);
         File index = new File("git/index");
         index.delete();
         index.createNewFile();
@@ -164,7 +161,7 @@ public class Git {
                         entries.add("blob " + sha + " " + child.getName());
                     }
                 } else {
-                    String sha = createTree(child.getPath()); // directoryPath + "/" + child
+                    String sha = createTree(child.getPath());
                     entries.add("tree " + sha + " " + child.getName());
 
                 }
