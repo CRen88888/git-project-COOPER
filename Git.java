@@ -274,7 +274,6 @@ public class Git {
         }
         String deepestLine = entries.get(0);
         String[] parts = deepestLine.split(" ", 3);
-        String type = parts[0];
         File deepestFile = new File(parts[2]);
         File targetDirectory = deepestFile.getParentFile();
         targetDirectory = new File(
