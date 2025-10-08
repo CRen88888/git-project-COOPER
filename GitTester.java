@@ -9,8 +9,10 @@ public class GitTester {
 
 
     public static void main(String[] args) throws IOException {
-        Git.createRepository();
-        createIndexTreeTest();
+        // Git.createRepository();
+        // createIndexTreeTest();
+        reset();
+        indexTest();
 
 
     }
@@ -53,6 +55,15 @@ public class GitTester {
             cleanup();
         }
         System.out.println("You're awesome. This code works, you genius.");
+
+    }
+
+    public static void createBlobTest() throws IOException {
+        File file = new File("sample/file.txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        Git.createBlob(file.toPath().toString());
 
     }
 

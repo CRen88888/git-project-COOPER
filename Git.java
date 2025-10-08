@@ -73,20 +73,24 @@ public class Git {
             return;
         }
         try {
+            File test = new File(filePath);
+            if (!test.exists() || !test.isFile()) {
+                throw new FileNotFoundException("File not found: " + filePath);
+            }
             byte[] bytes = Files.readAllBytes(Paths.get(filePath));
             String data = new String(bytes, StandardCharsets.UTF_8);
             String name = hashFunction(data);
             File file = new File("git/objects/" + name);
-            String s = new String();
+            StringBuilder s = new StringBuilder();
             file.createNewFile();
             hash.put(getFilePath(new File(filePath)), name);
             BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
             while (br.ready()) {
-                s = s + (br.readLine());
+                s.append((br.readLine()));
             }
             br.close();
             BufferedWriter wr = new BufferedWriter(new FileWriter("git/objects/" + name));
-            wr.write(s);
+            wr.write(s.toString());
             wr.close();
             updateIndex(filePath);
 
