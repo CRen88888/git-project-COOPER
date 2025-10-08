@@ -117,12 +117,10 @@ public class GitTester {
             for (int i = 0; i < files.length; i++) {
                 String data = content[i];
                 String name = Git.hashFunction(data);
-                File blob = new File("git/objects/" + name);
-                if (!blob.exists()) {
-                    Files.writeString(blob.toPath(), data);
-                }
+                Git.createBlob(Paths.get(files[i]).toString());
+                Files.writeString(Paths.get("git/objects/" + name), data);
                 Git.updateIndex(files[i]);
-                System.out.println("New BLOB: " + blob.getPath());
+                System.out.println("New BLOB creates");
 
             }
 
@@ -135,7 +133,9 @@ public class GitTester {
                 String[] section = line.split(" ");
                 String hash = section[0];
                 String name = section[1];
-                byte[] bytes = Files.readAllBytes(Paths.get(name));
+                String[] dirArray = name.split("/");
+                String fileName = dirArray[dirArray.length - 1];
+                byte[] bytes = Files.readAllBytes(Paths.get(fileName));
                 String data = new String(bytes, StandardCharsets.UTF_8);
                 String newhash = Git.hashFunction(data);
                 if (hash.equals(newhash)) {
