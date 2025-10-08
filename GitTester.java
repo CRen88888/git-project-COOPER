@@ -177,9 +177,11 @@ public class GitTester {
 
     public static void createIndexTreeTest() throws IOException {
         File index = new File("git/index");
+        File sample = new File("sample");
         File dir2 = new File("sample/dir2");
         File a = new File("sample/a.txt");
         File b = new File("sample/dir2/b.txt");
+        sample.mkdir();
         dir2.mkdir();
         a.createNewFile();
         b.createNewFile();
