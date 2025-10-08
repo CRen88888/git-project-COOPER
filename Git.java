@@ -79,8 +79,8 @@ public class Git {
             File file = new File("git/objects/" + name);
             String s = new String();
             file.createNewFile();
-            hash.put(name, getFilePath(filePath));
-            BufferedReader br = new BufferedReader(new FileReader(getFilePath(filePath)));
+            hash.put(getFilePath(new File(filePath)), name);
+            BufferedReader br = new BufferedReader(new FileReader(new File(filePath)));
             while (br.ready()) {
                 s = s + (br.readLine());
             }
@@ -97,23 +97,23 @@ public class Git {
     }
 
     public static void updateIndex(String filePath) throws IOException {
-        byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-        String data = new String(bytes, StandardCharsets.UTF_8);
-        String name = hashFunction(data);
+        // byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+        // String data = new String(bytes, StandardCharsets.UTF_8);
+        // String name = hashFunction(data);
         File index = new File("git/index");
         index.delete();
         index.createNewFile();
-        boolean check = index.exists() && index.length() > 0;
+        int counter = 0;
         try {
             BufferedWriter bw = new BufferedWriter(new FileWriter(index, true));
-            if (check == true) {
-                bw.write('\n');;
-            }
             for (Map.Entry<String, String> entry : hash.entrySet()) {
+                if (counter != 0) {
+                    bw.write('\n');
+                }
                 String key = entry.getKey();
                 String value = entry.getValue();
                 bw.write(value + " " + key);
-
+                counter++;
             }
 
             bw.close();
@@ -123,12 +123,8 @@ public class Git {
         }
     }
 
-    public static String getFilePath(String filePath) {
-        File file = new File(filePath);
-        Path base = Paths.get(new File("..").getAbsolutePath());
-        Path relative = Paths.get(file.getAbsolutePath());
-        Path path = base.relativize(relative);
-        return path + "";
+    public static String getFilePath(File file) {
+        return file.getAbsolutePath().substring(file.getAbsolutePath().indexOf("git-project"));
     }
 
     public static String createTree(String directoryPath) throws IOException {
@@ -169,6 +165,52 @@ public class Git {
         return treeHash;
     }
 
+    public static int slashCount(String line) {
+        String[] parts = line.split(" ", 3);
+        String path = parts[2];
+        int count = 0;
+        for (int i = 0; i < path.length(); i++) {
+            if (path.charAt(i) == '/') {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    public static void sortSlashCountDescend(List<String> lines) {
+        for (int i = 0; i < lines.size() - 1; i++) {
+            for (int j = 0; j < lines.size() - i - 1; j++) {
+                String first = lines.get(j);
+                String second = lines.get(j + 1);
+                int firstSlash = slashCount(first);
+                int secondSlash = slashCount(second);
+                if (secondSlash > firstSlash || (secondSlash == firstSlash
+                        && pathLine(second).compareTo(pathLine(first)) < 0)) {
+                    String temp = lines.get(j);
+                    lines.set(j, lines.get(j + 1));
+                    lines.set(j + 1, temp);
+                }
+            }
+        }
+    }
+
+    private static String pathLine(String line) {
+        if (line == null)
+            return "";
+        int space = 0;
+        StringBuilder s = new StringBuilder();
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == ' ') {
+                space++;
+            }
+            if (space >= 2) {
+                s.append(c);
+            }
+        }
+        return s.toString();
+    }
+
 
 
     public static String createIndexTree() throws IOException {
@@ -185,7 +227,7 @@ public class Git {
             String[] parts = line.split(" ");
             String hash = parts[0];
             String filePath = parts[1];
-            newLines.add("blob " + hash + " " + getFilePath(filePath));
+            newLines.add("blob " + hash + " " + getFilePath(new File(filePath)));
         }
 
         // if (!newLines.isEmpty()) {
@@ -195,7 +237,7 @@ public class Git {
         // newLines.set(lastIndex, s.substring(0, s.length() - 1));
         // }
         // }
-        Collections.sort(newLines);
+        sortSlashCountDescend(newLines);
         Files.write(workingList.toPath(), newLines, StandardCharsets.UTF_8);
         while (Files.readAllLines(Paths.get(workingList.getPath())).size() > 1) {
             createIndexTreeHelper();
@@ -225,27 +267,26 @@ public class Git {
         if (lines.isEmpty()) {
             return;
         }
-        int maxSlashes = -1;
-        String lowestLine = null;
-        for (String line : lines) {
-            String[] parts = line.split(" ", 3);
-            String pathString = parts[2];
-            char[] chars = pathString.toCharArray();
-            int counter = 0;
-            for (char c : chars) {
-                if (c == '/') {
-                    counter++;
-                }
-            }
-            if (counter > maxSlashes) {
-                maxSlashes = counter;
-                lowestLine = line;
-            }
-            if (lowestLine == null) {
-                return;
-            }
-        }
-
+        // int maxSlashes = -1;
+        String lowestLine = lines.get(0);
+        // for (String line : lines) {
+        // String[] parts = line.split(" ", 3);
+        // String pathString = parts[2];
+        // char[] chars = pathString.toCharArray();
+        // int counter = 0;
+        // for (char c : chars) {
+        // if (c == '/') {
+        // counter++;
+        // }
+        // }
+        // if (counter > maxSlashes) {
+        // maxSlashes = counter;
+        // lowestLine = line;
+        // }
+        // if (lowestLine == null) {
+        // return;
+        // }
+        // }
         String[] parts = lowestLine.split(" ", 3);
         String type = parts[0];
         File lowestFile = new File(parts[2]);
@@ -268,8 +309,8 @@ public class Git {
             }
         }
 
-        keep.add("tree " + treeHash + " " + getFilePath(targetDirectory.getPath()));
-        Collections.sort(keep);
+        keep.add("tree " + treeHash + " " + getFilePath(targetDirectory));
+        sortSlashCountDescend(keep);
         Files.write(Paths.get("git/objects/workingList"), keep, StandardCharsets.UTF_8);
         // try {
         // BufferedReader br = new BufferedReader(new FileReader(workingList));
