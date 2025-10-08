@@ -9,10 +9,9 @@ public class GitTester {
 
 
     public static void main(String[] args) throws IOException {
-        // Git.createRepository();
-        // createIndexTreeTest();
         reset();
-        indexTest();
+        createIndexTreeTest();
+
 
 
     }
@@ -178,10 +177,8 @@ public class GitTester {
 
     public static void createIndexTreeTest() throws IOException {
         File index = new File("git/index");
-        File directory = new File("git/objects/directory");
-        File a = new File("git/objects/a.txt");
-        File b = new File("git/objects/directory/b.txt");
-        directory.mkdirs();
+        File a = new File("sample/a.txt");
+        File b = new File("sample/dir2/b.txt");
         a.createNewFile();
         b.createNewFile();
         String aContent = "hello\n";
