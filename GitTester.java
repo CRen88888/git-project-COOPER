@@ -189,18 +189,10 @@ public class GitTester {
         String bContent = "world\n";
         Files.write(a.toPath(), aContent.getBytes(StandardCharsets.UTF_8));
         Files.write(b.toPath(), bContent.getBytes(StandardCharsets.UTF_8));
-        File git = new File("git");
-        File objects = new File("git/objects");
-        objects.mkdirs();
-        String aHash = Git.hashFunction(aContent);
-        String bHash = Git.hashFunction(bContent);
-        String indexLines =
-                aHash + " " + Git.getFilePath(a) + "\n" + bHash + " " + Git.getFilePath(b);
-        Files.write(index.toPath(), indexLines.getBytes(StandardCharsets.UTF_8));
+        Git.createBlob(a.getPath());
+        Git.createBlob(b.getPath());
         String rootTree = Git.createIndexTree();
         System.out.println("Root tree hash: " + rootTree);
-        Path workingList = new File("git/objects/workingList").toPath();
-        System.out.println("workingList");
         Path rootTreePath = new File("git/objects/" + rootTree).toPath();
         if (Files.exists(rootTreePath)) {
             System.out.println("root tree");
