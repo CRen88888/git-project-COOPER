@@ -14,7 +14,7 @@ String hashFunction(String input):
 I utilized the format for initializing a SHA-1 from the GeeksforGeeks website. It helped me create a SHA-1 in my code. Now, this hash will serve as the unique identifier for a String file input. It returns the sha of a String
 
 void createBlob(String filePath):
-This method takes in the String filePath and then generates a new BLOB where the contents of the file is the name and the contents of it are identical to the original file. If the filepath is null, this method does nothing.
+This method takes in the String filePath and then generates a new BLOB where the contents of the file is the name and the contents of it are identical to the original file. If the filepath is null, this method does nothing. It also updates the index with the new blob. 
 
 void updateIndex(String filePath):
 This method adds BLOB and file entries to the index with this format: blob 4377a91cdfd44db9a9bbf056849c7da0fc6cc7be myProgram/README.md
@@ -75,4 +75,5 @@ This method deletes all generated files from previous tests, including all objec
 void resetAllFiles(File directory):
 This is the helper method for robustReset(). It recursively deletes all generated files from previous tests including all objects in the objects directory.
 
-
+void createIndexTreeTest():
+This method tests the createIndexTree method. It creates two files, a and b inside a sample directory. The b file is in a sub directory called dir2. It then sysouts the root hash at the end of the root tree. 
