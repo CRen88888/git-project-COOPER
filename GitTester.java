@@ -2,13 +2,16 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class GitTester {
 
 
     public static void main(String[] args) throws IOException {
-        robustReset();
+        reset();
+        createIndexTreeTest();
+
 
 
     }
@@ -51,6 +54,15 @@ public class GitTester {
             cleanup();
         }
         System.out.println("You're awesome. This code works, you genius.");
+
+    }
+
+    public static void createBlobTest() throws IOException {
+        File file = new File("sample/file.txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        Git.createBlob(file.toPath().toString());
 
     }
 
@@ -104,12 +116,10 @@ public class GitTester {
             for (int i = 0; i < files.length; i++) {
                 String data = content[i];
                 String name = Git.hashFunction(data);
-                File blob = new File("git/objects/" + name);
-                if (!blob.exists()) {
-                    Files.writeString(blob.toPath(), data);
-                }
+                Git.createBlob(Paths.get(files[i]).toString());
+                Files.writeString(Paths.get("git/objects/" + name), data);
                 Git.updateIndex(files[i]);
-                System.out.println("New BLOB: " + blob.getPath());
+                System.out.println("New BLOB creates");
 
             }
 
@@ -122,7 +132,9 @@ public class GitTester {
                 String[] section = line.split(" ");
                 String hash = section[0];
                 String name = section[1];
-                byte[] bytes = Files.readAllBytes(Paths.get(name));
+                String[] dirArray = name.split("/");
+                String fileName = dirArray[dirArray.length - 1];
+                byte[] bytes = Files.readAllBytes(Paths.get(fileName));
                 String data = new String(bytes, StandardCharsets.UTF_8);
                 String newhash = Git.hashFunction(data);
                 if (hash.equals(newhash)) {
@@ -162,4 +174,28 @@ public class GitTester {
             }
         }
     }
+
+    public static void createIndexTreeTest() throws IOException {
+        File index = new File("git/index");
+        File sample = new File("sample");
+        File dir2 = new File("sample/dir2");
+        File a = new File("sample/a.txt");
+        File b = new File("sample/dir2/b.txt");
+        sample.mkdir();
+        dir2.mkdir();
+        a.createNewFile();
+        b.createNewFile();
+        String aContent = "hello\n";
+        String bContent = "world\n";
+        Files.write(a.toPath(), aContent.getBytes(StandardCharsets.UTF_8));
+        Files.write(b.toPath(), bContent.getBytes(StandardCharsets.UTF_8));
+        Git.createBlob(a.getPath());
+        Git.createBlob(b.getPath());
+        String rootTree = Git.createIndexTree();
+        System.out.println("Root tree hash: " + rootTree);
+
+    }
+
+
+
 }
