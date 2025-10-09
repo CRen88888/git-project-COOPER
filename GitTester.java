@@ -193,7 +193,12 @@ public class GitTester {
         Git.createBlob(b.getPath());
         String rootTree = Git.createIndexTree();
         System.out.println("Root tree hash: " + rootTree);
-
+        Path rootTreePath = new File("git/objects/" + rootTree).toPath();
+        if (Files.exists(rootTreePath)) {
+            System.out.println("root tree");
+        } else {
+            System.out.println("Root tree file not found: " + rootTree);
+        }
     }
 
 

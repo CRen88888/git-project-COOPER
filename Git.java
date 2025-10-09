@@ -68,22 +68,11 @@ public class Git {
         }
     }
 
-    public static String contents(File file) throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        StringBuilder s = new StringBuilder();
-        while (reader.ready()) {
-            s.append((char) reader.read());
-        }
-        reader.close();
-        return s.toString();
-    }
-
     public static void createBlob(String filePath) throws FileNotFoundException {
         if (filePath == null) {
             return;
         }
         try {
-            File index = new File("git/index");
             File test = new File(filePath);
             if (!test.exists() || !test.isFile()) {
                 throw new FileNotFoundException("File not found: " + filePath);
@@ -92,9 +81,6 @@ public class Git {
             String data = new String(bytes, StandardCharsets.UTF_8);
             String name = hashFunction(data);
             File file = new File("git/objects/" + name);
-            if (contents(index).contains(name + " " + getFilePath(file))) {
-                return;
-            }
             StringBuilder s = new StringBuilder();
             file.createNewFile();
             hash.put(getFilePath(new File(filePath)), name);
@@ -245,9 +231,16 @@ public class Git {
             String[] parts = line.split(" ");
             String hash = parts[0];
             String filePath = parts[1];
-            newLines.add("blob " + hash + " " + filePath);
+            newLines.add("blob " + hash + " " + getFilePath(new File(filePath)));
         }
 
+        // if (!newLines.isEmpty()) {
+        // int lastIndex = newLines.size() - 1;
+        // String s = newLines.get(lastIndex);
+        // if (s.endsWith("\n")) {
+        // newLines.set(lastIndex, s.substring(0, s.length() - 1));
+        // }
+        // }
         sortSlashCountDescend(newLines);
         Files.write(workingList.toPath(), newLines, StandardCharsets.UTF_8);
         while (Files.readAllLines(Paths.get(workingList.getPath())).size() > 1) {
@@ -259,6 +252,12 @@ public class Git {
             if (!partitions[0].equals("tree")) {
                 throw new IOException("Splitting did not work");
             }
+            // String rootHash = partitions[1];
+            // Path mainDir = Paths.get("git", rootHash);
+            // if (!Files.exists(mainDir)) {
+            // Files.write(mainDir, rootHash.getBytes(StandardCharsets.UTF_8));
+            // return rootHash;
+            // }
             return partitions[1];
         }
         return null;
@@ -268,39 +267,102 @@ public class Git {
 
     private static void createIndexTreeHelper() throws IOException {
         File workingList = new File("git/objects/workingList");
-        List<String> entries = Files.readAllLines(workingList.toPath(), StandardCharsets.UTF_8);
-        if (entries.isEmpty()) {
+        List<String> lines = Files.readAllLines(workingList.toPath(), StandardCharsets.UTF_8);
+        if (lines.isEmpty()) {
             return;
         }
-        String deepestLine = entries.get(0);
-        String[] parts = deepestLine.split(" ", 3);
+        // int maxSlashes = -1;
+        String lowestLine = lines.get(0);
+        // for (String line : lines) {
+        // String[] parts = line.split(" ", 3);
+        // String pathString = parts[2];
+        // char[] chars = pathString.toCharArray();
+        // int counter = 0;
+        // for (char c : chars) {
+        // if (c == '/') {
+        // counter++;
+        // }
+        // }
+        // if (counter > maxSlashes) {
+        // maxSlashes = counter;
+        // lowestLine = line;
+        // }
+        // if (lowestLine == null) {
+        // return;
+        // }
+        // }
+        String[] parts = lowestLine.split(" ", 3);
         String type = parts[0];
-        File deepestFile = new File(parts[2]);
-        File targetDirectory = deepestFile.getParentFile();
-        targetDirectory = new File(
-                targetDirectory.getPath().substring(targetDirectory.getPath().indexOf("/") + 1));
-        if (!targetDirectory.exists()) {
-            targetDirectory.mkdir();
+        File lowestFile = new File(parts[2]);
+        File targetDirectory = lowestFile.getParentFile();
+        if ("blob".equals(type)) {
+            targetDirectory = lowestFile.getParentFile();
+        } else {
+            targetDirectory = lowestFile;
         }
         if (targetDirectory == null || !targetDirectory.isDirectory()) {
-            throw new IOException("Unresolvable path: " + parts[2]);
+            return;
         }
         String treeHash = createTree(targetDirectory.getPath());
-        workingList.delete();
-        workingList.createNewFile();
         ArrayList<String> keep = new ArrayList<>();
-
-        for (String entry : entries) {
-            String[] splits = entry.split(" ", 3);
-            File file = new File(splits[2].substring(splits[2].indexOf("/") + 1));
+        for (String line : lines) {
+            String[] splits = line.split(" ", 3);
+            File file = new File(splits[2]);
             if (file.getParentFile() == null || !file.getParentFile().equals(targetDirectory)) {
-                keep.add(entry);
+                keep.add(line);
             }
         }
-        if (!keep.contains("tree " + treeHash + " " + getFilePath(targetDirectory))) {
-            keep.add("tree " + treeHash + " " + getFilePath(targetDirectory));
-        }
+
+        keep.add("tree " + treeHash + " " + getFilePath(targetDirectory));
         sortSlashCountDescend(keep);
         Files.write(Paths.get("git/objects/workingList"), keep, StandardCharsets.UTF_8);
+        // try {
+        // BufferedReader br = new BufferedReader(new FileReader(workingList));
+        // String line = "";
+        // while (br.ready()) {
+        // line = br.readLine();
+        // lines.add(line);
+        // }
+        // br.close();
+        // } catch (IOException e) {
+        // e.printStackTrace();
+        // }
+
+        // String[] originalLines = lines.toArray(new String[0]);
+        // workingList.delete();
+        // workingList.createNewFile();
+        // BufferedWriter bw = new BufferedWriter(new FileWriter(workingList, true));
+        // for (String line : originalLines) {
+        // String[] partitions = line.split(" ");
+        // String path = partitions[2];
+        // File file = new File(path);
+        // if (!file.getParentFile().equals(lowestFile.getParentFile())) {
+        // bw.write(line);
+        // }
+        // }
+        // byte[] content = Files.readAllBytes(Paths.get(workingList.getPath()));
+        // if (content.length > 0 && content[content.length - 1] == '\n') {
+        // byte[] newContent = new byte[content.length - 1];
+        // System.arraycopy(content, 0, newContent, 0, content.length - 1);
+        // Files.write(Paths.get(workingList.getPath()), newContent);
+        // }
+        // bw.write("tree " + treeHash + " " + getFilePath(lowestFile.getParentFile().getPath()));
+        // ArrayList<String> newLines = new ArrayList<>();
+        // for (String line : Files.readAllLines(Paths.get(workingList.getPath()))) {
+        // String[] splits = line.split(" ");
+        // String form = splits[0];
+        // String hash = splits[1];
+        // String relPath = splits[2];
+        // newLines.add(form + " " + hash + " " + relPath + "\n");
+        // }
+        // if (!newLines.isEmpty()) {
+        // int lastIndex = newLines.size() - 1;
+        // String s = newLines.get(lastIndex);
+        // if (s.endsWith("\n")) {
+        // newLines.set(lastIndex, s.substring(0, s.length() - 1));
+        // }
+        // }
+        // Collections.sort(newLines);
+        // bw.close();
     }
 }
