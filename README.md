@@ -43,6 +43,16 @@ This method uses the index file to generate trees recursively. It creates a temp
 void createIndexTreeHelper():
 This method is the helper method for createIndexTree(). It merges the blob(s) deepest in the tree into a subdirectory or tree from the working list. It is called in a while loop in createIndexTree() until there is only a root directory present in the working list. It parses lines into three parts: type, sha, and relative path. It picks the current deepest entry and determines its target directory. From that, it makes a tree object for the parent directory via CreateTree(). It then replaces all entries from that directory with a single consolidated line with information of the tree and resorts the remaining blobs and trees in the working list. Repeating this helper collapses siblings into their parent directory, then parents into their ancestors, until only one line remains—the root tree—whose hash is the final output of createIndexTree().
 
+String hashFile():
+This method hashes the contents of a file using a SHA1 hash and returns the result.
+
+boolean isCreatedCorrectly():
+This method first finds the root index, then calls the recursive isCreatedCorrectlyHelper() to verify if all trees and BLOBs that were supposed to be created, according to the index, have been.
+
+boolean isCreatedCorrectlyHelper():
+This method finds all BLOBs and trees that a given file in the bjects folder references, and calls itself to see if the files it references exist. 
+
+
 GITTESTER CONTENT:
 This class is used to check the functionality of the Git class. It checks to verify if all the files are present, it deletes all the files and directories present, and it runs multiple initialization/cleanup cycles to confirm functionality.
 
