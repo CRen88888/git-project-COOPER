@@ -50,7 +50,7 @@ public class Git {
             } catch (Exception e) {
                 System.out.println(e);
             }
-            System.out.println("Git Repository Created");
+            // System.out.println("Git Repository Created");
         }
     }
 
@@ -256,22 +256,22 @@ public class Git {
         List<String> root = Files.readAllLines(workingList.toPath(), StandardCharsets.UTF_8);
         if (root.size() == 1) {
             String[] partitions = root.get(0).split(" ", 3);
-            if (!partitions[0].equals("tree")) {
-                throw new IOException("Splitting did not work");
-            }
-            String rootHash = hashFile("git\\objects\\workingList");
+            // if (partitions[0].equals("tree")) {
+                String rootHash = hashFile("git\\objects\\workingList");
             File rooter = new File("git\\objects\\"+ rootHash);
             rooter.createNewFile();
             Files.write(Paths.get("git\\objects\\"+ rootHash), Files.readAllBytes(Paths.get("git\\objects\\workingList")));
             Files.write(Paths.get("git\\objects\\workingList"), ("tree " + rootHash + " (root)").getBytes(StandardCharsets.UTF_8));
             String topHash = hashFile("git\\objects\\workingList");
-            System.out.println(rootHash);
-            System.out.println(topHash);
+            // System.out.println(rootHash);
+            // System.out.println(topHash);
             File finalFile = new File("git\\objects\\"+topHash);
             finalFile.createNewFile();
             Files.write(Paths.get("git\\objects\\" + topHash), Files.readAllBytes(Paths.get("git\\objects\\workingList")));
             Files.delete(Paths.get("git\\objects\\workingList"));
             return partitions[1];
+            // }
+            
         }
         return null;
 
@@ -394,13 +394,13 @@ public class Git {
         return true;
     }
     
-    public static void commit() {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter name of commit author: ");
-        String author = scanner.nextLine();
-        System.out.print("Enter commmit message: ");
-        String message = scanner.nextLine();
-        scanner.close();
+    public static void commit(String author, String message) {
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter name of commit author: ");
+        // String author = scanner.nextLine();
+        // System.out.print("Enter commmit message: ");
+        // String message = scanner.nextLine();
+        // scanner.close();
         File objects = new File("git\\objects");
         File[] things = objects.listFiles();
         try {

@@ -9,12 +9,32 @@ public class GitTester {
 
 
     public static void main(String[] args) throws IOException {
-        reset();
-        createIndexTreeTest();
-        System.out.println(Git.isCreatedCorrectly());
-        Git.commit();
-
+        GitWrapper finalTester = new GitWrapper();
+        finalTester.init();
+        finalTester.add("ThisIsItBoys");
+        finalTester.commit("JP Baca", "I am so happy that I was able to Git this done on time.");
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     public static boolean repositoryCheck() {
         File git = new File("git");
