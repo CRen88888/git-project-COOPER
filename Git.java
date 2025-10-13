@@ -13,10 +13,11 @@ import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Collections;
+// import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class Git {
     public static void main(String[] args) throws FileNotFoundException {
@@ -49,7 +50,7 @@ public class Git {
             } catch (Exception e) {
                 System.out.println(e);
             }
-            System.out.println("Git Repository Created");
+            // System.out.println("Git Repository Created");
         }
     }
 
@@ -83,7 +84,7 @@ public class Git {
             return;
         }
         try {
-            File index = new File("git/index");
+            File index = new File("git\\index");
             File test = new File(filePath);
             if (!test.exists() || !test.isFile()) {
                 throw new FileNotFoundException("File not found: " + filePath);
@@ -91,7 +92,7 @@ public class Git {
             byte[] bytes = Files.readAllBytes(Paths.get(filePath));
             String data = new String(bytes, StandardCharsets.UTF_8);
             String name = hashFunction(data);
-            File file = new File("git/objects/" + name);
+            File file = new File("git\\objects\\" + name);
             if (contents(index).contains(name + " " + getFilePath(file))) {
                 return;
             }
@@ -103,7 +104,7 @@ public class Git {
                 s.append((br.readLine()));
             }
             br.close();
-            BufferedWriter wr = new BufferedWriter(new FileWriter("git/objects/" + name));
+            BufferedWriter wr = new BufferedWriter(new FileWriter("git\\objects\\" + name));
             wr.write(s.toString());
             wr.close();
             updateIndex(filePath);
@@ -118,7 +119,7 @@ public class Git {
         // byte[] bytes = Files.readAllBytes(Paths.get(filePath));
         // String data = new String(bytes, StandardCharsets.UTF_8);
         // String name = hashFunction(data);
-        File index = new File("git/index");
+        File index = new File("git\\index");
         index.delete();
         index.createNewFile();
         int counter = 0;
@@ -187,7 +188,7 @@ public class Git {
         String path = parts[2];
         int count = 0;
         for (int i = 0; i < path.length(); i++) {
-            if (path.charAt(i) == '/') {
+            if (path.charAt(i) == '\\') {
                 count++;
             }
         }
@@ -231,11 +232,11 @@ public class Git {
 
 
     public static String createIndexTree() throws IOException {
-        File index = new File("git/index");
+        File index = new File("git\\index");
         if (!index.exists()) {
             throw new IOException("index file not found");
         }
-        File workingList = new File("git/objects/workingList");
+        File workingList = new File("git\\objects\\workingList");
         if (!workingList.exists()) {
             workingList.createNewFile();
         }
@@ -255,10 +256,22 @@ public class Git {
         List<String> root = Files.readAllLines(workingList.toPath(), StandardCharsets.UTF_8);
         if (root.size() == 1) {
             String[] partitions = root.get(0).split(" ", 3);
-            if (!partitions[0].equals("tree")) {
-                throw new IOException("Splitting did not work");
-            }
+            // if (partitions[0].equals("tree")) {
+                String rootHash = hashFile("git\\objects\\workingList");
+            File rooter = new File("git\\objects\\"+ rootHash);
+            rooter.createNewFile();
+            Files.write(Paths.get("git\\objects\\"+ rootHash), Files.readAllBytes(Paths.get("git\\objects\\workingList")));
+            Files.write(Paths.get("git\\objects\\workingList"), ("tree " + rootHash + " (root)").getBytes(StandardCharsets.UTF_8));
+            String topHash = hashFile("git\\objects\\workingList");
+            // System.out.println(rootHash);
+            // System.out.println(topHash);
+            File finalFile = new File("git\\objects\\"+topHash);
+            finalFile.createNewFile();
+            Files.write(Paths.get("git\\objects\\" + topHash), Files.readAllBytes(Paths.get("git\\objects\\workingList")));
+            Files.delete(Paths.get("git\\objects\\workingList"));
             return partitions[1];
+            // }
+            
         }
         return null;
 
@@ -266,7 +279,7 @@ public class Git {
     }
 
     private static void createIndexTreeHelper() throws IOException {
-        File workingList = new File("git/objects/workingList");
+        File workingList = new File("git\\objects\\workingList");
         List<String> entries = Files.readAllLines(workingList.toPath(), StandardCharsets.UTF_8);
         if (entries.isEmpty()) {
             return;
@@ -276,7 +289,7 @@ public class Git {
         File deepestFile = new File(parts[2]);
         File targetDirectory = deepestFile.getParentFile();
         targetDirectory = new File(
-                targetDirectory.getPath().substring(targetDirectory.getPath().indexOf("/") + 1));
+                targetDirectory.getPath().substring(targetDirectory.getPath().indexOf("\\") + 1));
         if (!targetDirectory.exists()) {
             targetDirectory.mkdir();
         }
@@ -290,7 +303,7 @@ public class Git {
 
         for (String entry : entries) {
             String[] splits = entry.split(" ", 3);
-            File file = new File(splits[2].substring(splits[2].indexOf("/") + 1));
+            File file = new File(splits[2].substring(splits[2].indexOf("\\") + 1));
             if (file.getParentFile() == null || !file.getParentFile().equals(targetDirectory)) {
                 keep.add(entry);
             }
@@ -299,6 +312,128 @@ public class Git {
             keep.add("tree " + treeHash + " " + getFilePath(targetDirectory));
         }
         sortSlashCountDescend(keep);
-        Files.write(Paths.get("git/objects/workingList"), keep, StandardCharsets.UTF_8);
+        Files.write(Paths.get("git\\objects\\workingList"), keep, StandardCharsets.UTF_8);
+    }
+
+    public static boolean isCreatedCorrectly() {
+        File objects = new File("git\\objects");
+        File[] things = objects.listFiles();
+        try {
+            for (File file : things) {
+                if (new String(Files.readAllBytes(Paths.get("git\\objects\\"+file.getName()))).contains("(root)")) {
+                    return isCreatedCorrectlyHelper("git\\objects\\"+file.getName());
+                }
+            }
+            return isCreatedCorrectlyHelper(null);
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.err.println(e);
+            // System.out.println("sigmanite");
+            return false;
+        }
+    }
+    
+    public static String hashFile(String filePath) {
+        File testFile = new File(filePath);
+        if (testFile.exists()) {
+            try {
+            byte[] bytes = Files.readAllBytes(Paths.get(filePath));
+            String content = new String(bytes, StandardCharsets.UTF_8);
+            if (!content.isEmpty() && content.charAt(0) == '\uFEFF') {
+                content = content.substring(1);
+            }
+            content = content.replace("\r\n", "\n").replace("\r", "\n");
+            byte[] normalizedBytes = content.getBytes(StandardCharsets.UTF_8);
+            MessageDigest mDigest = MessageDigest.getInstance("SHA-1");
+            byte[] hashedBytes = mDigest.digest(normalizedBytes);
+            StringBuilder hashedString = new StringBuilder();
+            for (byte b : hashedBytes) {
+                String hexB = Integer.toHexString(0xff & b);
+                if (hexB.length() == 1) {
+                    hashedString.append("0");
+                }
+                hashedString.append(hexB);
+            }
+            return hashedString.toString();
+        } catch (IOException | NoSuchAlgorithmException e) {
+            System.err.println(e);
+            return null;
+        }
+        }
+        else {
+            return null;
+        }
+    }
+
+    private static boolean isCreatedCorrectlyHelper(String path) {
+        try {
+            ArrayList<String> lines = new ArrayList<String>(Files.readAllLines(Paths.get(path)));
+            for (String line : lines) {
+                if (line.contains("tree")) {
+                    if (!isCreatedCorrectlyHelper("git\\objects\\" + line.substring(5, 45))) {
+                        // System.out.println(line);
+                        // System.out.println(line.substring(5, 45));
+                        // System.out.println("sigmaniter");
+                        return false;
+                    }
+                } else {
+                    if (!Files.exists(Paths.get("git\\objects\\" + line.substring(5, 45)))) {
+                        // System.out.println(line);
+                        // System.out.println(line.substring(5, 45));
+                        // System.out.println("sigmanites");
+                        return false;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            // System.out.println("sigmaniting");
+            return false;
+        }
+        return true;
+    }
+    
+    public static void commit(String author, String message) {
+        // Scanner scanner = new Scanner(System.in);
+        // System.out.print("Enter name of commit author: ");
+        // String author = scanner.nextLine();
+        // System.out.print("Enter commmit message: ");
+        // String message = scanner.nextLine();
+        // scanner.close();
+        File objects = new File("git\\objects");
+        File[] things = objects.listFiles();
+        try {
+            String rootTree = "";
+            for (File file : things) {
+                if (new String(Files.readAllBytes(Paths.get("git\\objects\\" + file.getName()))).contains("(root)")) {
+                    rootTree = file.getName();
+                }
+            }
+            String parent = new String(Files.readAllBytes(Paths.get("git\\HEAD")));
+            String timestamp = "" + System.currentTimeMillis();
+            StringBuilder str = new StringBuilder();
+            str.append("tree: ");
+            str.append(rootTree);
+            if (!parent.equals("")) {
+                str.append("\nparent: ");
+                str.append(parent);
+            }
+            str.append("\nauthor: ");
+            str.append(author);
+            str.append("\ndate: ");
+            str.append(timestamp);
+            str.append("\nmessage: ");
+            str.append(message);
+            String commit = str.toString();
+            String commitHash = hashFunction(commit);
+            File commitFile = new File("git\\objects\\" + commitHash);
+            commitFile.createNewFile();
+            Files.write(Paths.get("git\\objects\\" + commitHash), commit.getBytes(StandardCharsets.UTF_8));
+            Files.write(Paths.get("git\\HEAD"), commitHash.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.err.println(e);
+        }
     }
 }
