@@ -52,6 +52,9 @@ This method first finds the root index, then calls the recursive isCreatedCorrec
 boolean isCreatedCorrectlyHelper():
 This method finds all BLOBs and trees that a given file in the bjects folder references, and calls itself to see if the files it references exist. 
 
+void commit():
+This method prompts the user for an author name and message, before creating a commit object that is stored in git\objects. If a parent exists in the HEAD file, it is included in the message. The current root hash and the time are also stored. 
+
 
 GITTESTER CONTENT:
 This class is used to check the functionality of the Git class. It checks to verify if all the files are present, it deletes all the files and directories present, and it runs multiple initialization/cleanup cycles to confirm functionality.
