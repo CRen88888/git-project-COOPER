@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class Git {
     public static void main(String[] args) throws FileNotFoundException {
@@ -369,15 +370,14 @@ public class Git {
             ArrayList<String> lines = new ArrayList<String>(Files.readAllLines(Paths.get(path)));
             for (String line : lines) {
                 if (line.contains("tree")) {
-                    if (!isCreatedCorrectlyHelper("git\\objects\\"+line.substring(5, 45))) {
+                    if (!isCreatedCorrectlyHelper("git\\objects\\" + line.substring(5, 45))) {
                         // System.out.println(line);
                         // System.out.println(line.substring(5, 45));
                         // System.out.println("sigmaniter");
                         return false;
                     }
-                }
-                else {
-                    if (!Files.exists(Paths.get("git\\objects\\"+line.substring(5, 45)))) {
+                } else {
+                    if (!Files.exists(Paths.get("git\\objects\\" + line.substring(5, 45)))) {
                         // System.out.println(line);
                         // System.out.println(line.substring(5, 45));
                         // System.out.println("sigmanites");
@@ -392,5 +392,48 @@ public class Git {
             return false;
         }
         return true;
+    }
+    
+    public static void commit() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter name of commit author: ");
+        String author = scanner.nextLine();
+        System.out.print("Enter commmit message: ");
+        String message = scanner.nextLine();
+        scanner.close();
+        File objects = new File("git\\objects");
+        File[] things = objects.listFiles();
+        try {
+            String rootTree = "";
+            for (File file : things) {
+                if (new String(Files.readAllBytes(Paths.get("git\\objects\\" + file.getName()))).contains("(root)")) {
+                    rootTree = file.getName();
+                }
+            }
+            String parent = new String(Files.readAllBytes(Paths.get("git\\HEAD")));
+            String timestamp = "" + System.currentTimeMillis();
+            StringBuilder str = new StringBuilder();
+            str.append("tree: ");
+            str.append(rootTree);
+            if (!parent.equals("")) {
+                str.append("\nparent: ");
+                str.append(parent);
+            }
+            str.append("\nauthor: ");
+            str.append(author);
+            str.append("\ndate: ");
+            str.append(timestamp);
+            str.append("\nmessage: ");
+            str.append(message);
+            String commit = str.toString();
+            String commitHash = hashFunction(commit);
+            File commitFile = new File("git\\objects\\" + commitHash);
+            commitFile.createNewFile();
+            Files.write(Paths.get("git\\objects\\" + commitHash), commit.getBytes(StandardCharsets.UTF_8));
+            Files.write(Paths.get("git\\HEAD"), commitHash.getBytes(StandardCharsets.UTF_8));
+        } catch (Exception e) {
+            // TODO: handle exception
+            System.err.println(e);
+        }
     }
 }

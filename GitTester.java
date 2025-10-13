@@ -12,7 +12,7 @@ public class GitTester {
         reset();
         createIndexTreeTest();
         System.out.println(Git.isCreatedCorrectly());
-
+        Git.commit();
 
     }
 
