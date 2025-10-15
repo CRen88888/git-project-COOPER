@@ -14,7 +14,7 @@ String hashFunction(String input):
 I utilized the format for initializing a SHA-1 from the GeeksforGeeks website. It helped me create a SHA-1 in my code. Now, this hash will serve as the unique identifier for a String file input. It returns the sha of a String
 
 void createBlob(String filePath):
-This method takes in the String filePath and then generates a new BLOB where the contents of the file is the name and the contents of it are identical to the original file. If the filepath is null, this method does nothing. It also updates the index with the new blob. 
+This method takes in the String filePath and then generates a new BLOB where the contents of the file is the name and the contents of it are identical to the original file. If the filepath is null, this method does nothing. It also updates the index with the new blob.
 
 void updateIndex(String filePath):
 This method adds BLOB and file entries to the index with this format: blob 4377a91cdfd44db9a9bbf056849c7da0fc6cc7be myProgram/README.md
@@ -50,11 +50,10 @@ boolean isCreatedCorrectly():
 This method first finds the root index, then calls the recursive isCreatedCorrectlyHelper() to verify if all trees and BLOBs that were supposed to be created, according to the index, have been.
 
 boolean isCreatedCorrectlyHelper():
-This method finds all BLOBs and trees that a given file in the bjects folder references, and calls itself to see if the files it references exist. 
+This method finds all BLOBs and trees that a given file in the bjects folder references, and calls itself to see if the files it references exist.
 
 void commit():
-This method prompts the user for an author name and message, before creating a commit object that is stored in git\objects. If a parent exists in the HEAD file, it is included in the message. The current root hash and the time are also stored. 
-
+This method prompts the user for an author name and message, before creating a commit object that is stored in git\objects. If a parent exists in the HEAD file, it is included in the message. The current root hash and the time are also stored.
 
 GITTESTER CONTENT:
 This class is used to check the functionality of the Git class. It checks to verify if all the files are present, it deletes all the files and directories present, and it runs multiple initialization/cleanup cycles to confirm functionality.
@@ -89,4 +88,40 @@ void resetAllFiles(File directory):
 This is the helper method for robustReset(). It recursively deletes all generated files from previous tests including all objects in the objects directory.
 
 void createIndexTreeTest():
-This method tests the createIndexTree method. It creates two files, a and b inside a sample directory. The b file is in a sub directory called dir2. It then sysouts the root hash at the end of the root tree. 
+This method tests the createIndexTree method. It creates two files, a and b inside a sample directory. The b file is in a sub directory called dir2. It then sysouts the root hash at the end of the root tree.
+
+void createRepositoryTest():
+This method tests the createRepository() functionality. It calls the Git.createRepository() method and then verifies that the repository was created successfully by using the repositoryCheck() method. It prints whether the repository creation was successful.
+
+void hashFunctionTest():
+This method tests the hashFunction() method by providing a sample input string "Hello, World!" and verifying that the SHA-1 hash is generated correctly. It displays the input, the resulting hash, and confirms the hash length is 40 characters.
+
+void contentsTest():
+This method tests the contents() method by creating a temporary test file with known content, reading it using Git.contents(), and verifying the content matches. It includes proper cleanup by deleting the test file after the test completes.
+
+void createBlobSimpleTest():
+This method tests the createBlob() functionality with a simple test case. It creates a temporary file with test content, calls Git.createBlob() to create a blob object, and verifies the operation completes successfully. It includes cleanup by deleting the test file.
+
+void updateIndexTest():
+This method tests the updateIndex() functionality by calling Git.updateIndex() with a test file path. It verifies that the index update operation completes without throwing exceptions.
+
+void getFilePathTest():
+This method tests the getFilePath() method by creating a File object with a path containing "git-project-COOPER" and verifying that the method correctly extracts and returns the relative path portion.
+
+void createTreeTest():
+This method tests the createTree() functionality by creating a test directory structure with a file inside it. It calls Git.createTree() to generate a tree object and displays the resulting tree hash. It includes proper cleanup by removing the test directory and file.
+
+void slashCountTest():
+This method tests the slashCount() method by providing a sample line with a path containing slashes and verifying that the method correctly counts and returns the number of slashes in the path portion.
+
+void isCreatedCorrectlyTest():
+This method tests the isCreatedCorrectly() functionality by calling the method and displaying whether the repository structure is correctly created according to the validation logic.
+
+void hashFileTest():
+This method tests the hashFile() functionality by creating a temporary file with test content, calling Git.hashFile() to generate a SHA-1 hash of the file contents, and displaying the resulting hash. It includes cleanup by deleting the test file.
+
+void commitTest():
+This method tests the commit() functionality by calling Git.commit() with a test author name and commit message. It verifies that the commit operation completes successfully without throwing exceptions.
+
+void runAllTests():
+This comprehensive method runs all individual test methods in sequence to provide a complete test suite for the Git class functionality. It includes proper formatting with separators between tests and provides a clear indication when all tests are completed.
